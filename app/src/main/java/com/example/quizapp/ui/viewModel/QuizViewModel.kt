@@ -16,14 +16,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.TimeZone
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @HiltViewModel
 class QuizViewModel @Inject constructor(private val quizRepo: QuizRepo) : ViewModel() {
 
     private val _quizList = MutableStateFlow<QuizResponseList?>(null)
-    private val _quizAnswers = MutableStateFlow<List<QuizAnswer>>(emptyList())
+    private val quizAnswers = mutableListOf<QuizAnswer>()
 
     private val quizUiMutableState = MutableStateFlow<QuizListState>(QuizListState.QuizLandingView)
     internal val quizUIState: StateFlow<QuizListState> = quizUiMutableState.asStateFlow()
@@ -46,11 +46,67 @@ class QuizViewModel @Inject constructor(private val quizRepo: QuizRepo) : ViewMo
             updateUIState(
                 QuizListState.QuizQuestionView(
                     quizQuestion = _quizList.value?.quiz?.get(0),
-                    questionNumber = 1,
+                    questionNumber = 0,
                     totalQuestions = _quizList.value?.quiz?.size ?: 0,
                 )
             )
         }
+    }
+
+    internal fun getNextQuiz() = viewModelScope.launch {
+        val currentState = quizUIState.value
+        if (currentState is QuizListState.QuizQuestionView) {
+            if (_quizList.value?.quiz?.size == currentState.questionNumber + 1) {
+                val correctAnswer = quizAnswers.count { it.correctAnswer }
+                updateUIState(
+                    QuizListState.QuizSuccessView(
+                        score = ((correctAnswer.toDouble() / quizAnswers.size.toDouble()) * 100).roundToInt(),
+                        correctAnswer = correctAnswer,
+                        wrongAnswer = quizAnswers.size - correctAnswer,
+                    )
+                )
+            } else {
+                val optionSelected =
+                    currentState.quizQuestion?.options?.find { it.selected }?.selected
+                if (optionSelected == true) {
+                    val result = isCorrectAnswer(currentState)
+                    val quizAnswered = QuizAnswer(
+                        id = currentState.quizQuestion.id,
+                        correctAnswer = result
+                    )
+                    quizAnswers.add(quizAnswered)
+                    val response = quizRepo.sendAttemptedAnswer(quizAnswered).first()
+                    when (response) {
+                        is QuizService.QuizAttemptResponse.Success -> {
+                            val questionNumber = currentState.questionNumber + 1
+                            updateUIState(
+                                QuizListState.QuizQuestionView(
+                                    quizQuestion = _quizList.value?.quiz?.get(questionNumber),
+                                    questionNumber = questionNumber,
+                                    totalQuestions = _quizList.value?.quiz?.size ?: 0,
+                                )
+                            )
+                        }
+
+                        QuizService.QuizAttemptResponse.Failure -> Unit
+                    }
+                }
+            }
+        }
+    }
+
+    private fun isCorrectAnswer(currentState: QuizListState.QuizQuestionView): Boolean {
+        val quiz = currentState.quizQuestion
+        // Get all selected option IDs
+        val selectedOptionIds = quiz?.options?.filter { it.selected }?.map { it.id }
+
+        // Get all correct answer IDs
+        val correctAnswerIds = quiz?.correctAnswers?.map { it.answerId }
+
+        // Check if the sets are equal
+        val isCorrect = selectedOptionIds?.toSet() == correctAnswerIds?.toSet()
+
+        return isCorrect
     }
 
     internal fun onOptionSelection(id: String) {

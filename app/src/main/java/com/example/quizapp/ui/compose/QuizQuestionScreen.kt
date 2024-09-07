@@ -71,9 +71,7 @@ internal fun QuizQuestionScreen(
                     QuizButton(
                         text = "Next",
                         addIcon = true,
-                        onClick = {
-                            // Handle next button click
-                        }
+                        onClick = quizHandler.onNextClick,
                     )
                     Spacer(modifier = Modifier.height(28.dp))
                 }
@@ -85,8 +83,8 @@ internal fun QuizQuestionScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 ProgressIndicator(
-                    progress = 0.2f,
-                    questionNumber = quizState.questionNumber,
+                    progress = quizState.questionNumber.plus(1).toFloat() / quizState.totalQuestions.toFloat(),
+                    questionNumber = quizState.questionNumber.plus(1),
                     totalQuestion = quizState.totalQuestions
                 )
             }

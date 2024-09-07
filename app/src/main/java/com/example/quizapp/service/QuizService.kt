@@ -1,5 +1,7 @@
 package com.example.quizapp.service
 
+import com.example.quizapp.model.QuizAnswer
+import com.example.quizapp.model.QuizAttemptedResponse
 import com.example.quizapp.model.QuizResponseList
 import com.example.quizapp.networking.ApiService
 import kotlinx.coroutines.flow.Flow
@@ -15,6 +17,23 @@ class QuizService @Inject constructor(private val apiService: ApiService) {
             emit(handleResponse(response))
         }.catch { error ->
             emit(QuizResponse.Failure(error.message ?: "Something went wrong"))
+        }
+    }
+
+    suspend fun sendAttemptedAnswer(quizAnswered: QuizAnswer): Flow<QuizAttemptResponse> {
+        return flow {
+            val response = apiService.sendAttemptedAnswer(quizAnswered)
+            emit(handleAttemptedResponse(response))
+        }.catch {
+            emit(QuizAttemptResponse.Failure)
+        }
+    }
+
+    private fun handleAttemptedResponse(response: Response<QuizAttemptedResponse>): QuizAttemptResponse {
+        return if (response.isSuccessful) {
+            QuizAttemptResponse.Success
+        } else {
+            QuizAttemptResponse.Failure
         }
     }
 
@@ -35,5 +54,10 @@ class QuizService @Inject constructor(private val apiService: ApiService) {
     sealed class QuizResponse {
         data class Success(val quizList: QuizResponseList) : QuizResponse()
         data class Failure(val error: String) : QuizResponse()
+    }
+
+    sealed interface QuizAttemptResponse {
+        data object Success : QuizAttemptResponse
+        data object Failure : QuizAttemptResponse
     }
 }

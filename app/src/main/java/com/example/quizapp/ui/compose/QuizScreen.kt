@@ -50,7 +50,8 @@ internal fun QuizScreen(viewModel: QuizViewModel = hiltViewModel()) {
                 onStartClick = {
                     viewModel.startQuiz()
                 },
-                onNextClick = { _, _, _ -> // TODO
+                onNextClick = {
+                    viewModel.getNextQuiz()
                 },
                 onStartAgain = {
                     // TODO
