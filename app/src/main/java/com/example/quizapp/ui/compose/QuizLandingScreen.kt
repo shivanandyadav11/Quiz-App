@@ -14,17 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.quizapp.handler.QuizHandler
 import com.example.quizapp.ui.compose.widget.CircleWithText
 import com.example.quizapp.ui.compose.widget.QuizButton
-import com.example.quizapp.ui.viewModel.QuizViewModel
 
 @Composable
 internal fun QuizLandingScreen(
-    viewModel: QuizViewModel = hiltViewModel(),
     gradientStartColor: Color = Color.Blue,
     gradientEndColor: Color = Color.Transparent,
-    onStartClick: () -> Unit,
+    quizHandler: QuizHandler,
 ) {
     Box(
         modifier = Modifier
@@ -60,7 +58,7 @@ internal fun QuizLandingScreen(
 
             QuizButton(
                 text = "Start",
-                onClick = onStartClick,
+                onClick = quizHandler.onStartClick,
             )
             Spacer(modifier = Modifier.height(8.dp))
         }

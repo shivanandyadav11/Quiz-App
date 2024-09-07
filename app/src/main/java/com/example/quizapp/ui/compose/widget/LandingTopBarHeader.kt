@@ -21,21 +21,26 @@ import androidx.compose.ui.unit.sp
 import com.example.quizapp.ui.theme.Orange
 
 @Composable
-internal fun LandingTopBarHeader() {
+internal fun LandingTopBarHeader(
+    text: String,
+    isIconNeeded: Boolean = false
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Icon(
-            imageVector = Icons.Default.Warning,
-            contentDescription = "Home Icon",
-            tint = Orange,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
+        if (isIconNeeded) {
+            Icon(
+                imageVector = Icons.Default.Warning,
+                contentDescription = "$text Icon",
+                tint = Orange,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
         Text(
-            text = "Home",
+            text = text,
             style = TextStyle(
                 color = Color.Black,
                 fontSize = 24.sp,
