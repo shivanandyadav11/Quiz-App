@@ -16,7 +16,7 @@ data class Quiz(
 data class Option(
     val id: String,
     val text: String,
-    val selected: Boolean = false,
+    var selected: Boolean = false,
 )
 
 data class CorrectAnswer(

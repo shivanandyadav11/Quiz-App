@@ -1,6 +1,7 @@
 package com.example.quizapp.ui.compose.widget
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +25,7 @@ import com.example.quizapp.ui.theme.DarkGrey
 import com.example.quizapp.ui.theme.LightGrey
 
 @Composable
-fun AnswerOptions(options: List<Option?>?, onSelectAnswer: (String) -> Unit) {
+    fun AnswerOptions(options: List<Option?>?, onSelectAnswer: (String) -> Unit) {
     options?.forEach { option ->
         option?.let {
             val modifier = if (it.selected)
@@ -36,7 +37,9 @@ fun AnswerOptions(options: List<Option?>?, onSelectAnswer: (String) -> Unit) {
                         shape = CardDefaults.shape
                     ) else Modifier.fillMaxWidth()
             Card(
-                modifier = modifier,
+                modifier = modifier.clickable(onClick = {
+                    onSelectAnswer(it.id)
+                }),
                 colors = CardDefaults.cardColors(containerColor = LightGrey)
             ) {
                 Row(modifier = Modifier.padding(vertical = 20.dp)) {

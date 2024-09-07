@@ -50,12 +50,15 @@ internal fun QuizScreen(viewModel: QuizViewModel = hiltViewModel()) {
                 onStartClick = {
                     viewModel.startQuiz()
                 },
-                onNextClick = { _, _,_ -> // TODO
+                onNextClick = { _, _, _ -> // TODO
                 },
                 onStartAgain = {
                     // TODO
                 }
             ),
+            onSelectAnswer = {
+                viewModel.onOptionSelection(it)
+            },
             modifier = Modifier.padding(innerPadding)
         )
     }
@@ -65,6 +68,7 @@ internal fun QuizScreen(viewModel: QuizViewModel = hiltViewModel()) {
 private fun QuizScreenImpl(
     quizState: QuizListState,
     quizHandler: QuizHandler,
+    onSelectAnswer: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -77,6 +81,7 @@ private fun QuizScreenImpl(
                 QuizQuestionScreen(
                     quizState = quizState,
                     quizHandler = quizHandler,
+                    onSelectAnswer = { onSelectAnswer(it) },
                 )
             }
 

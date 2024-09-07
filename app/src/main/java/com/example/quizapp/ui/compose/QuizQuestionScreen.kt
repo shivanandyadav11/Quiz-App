@@ -29,10 +29,13 @@ import com.example.quizapp.ui.viewModel.QuizViewModel
 internal fun QuizQuestionScreen(
     quizState: QuizViewModel.QuizListState.QuizQuestionView,
     quizHandler: QuizHandler,
+    onSelectAnswer: (String) -> Unit
 ) {
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.Blue)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Blue)
+    ) {
         Spacer(modifier = Modifier.height(48.dp))
         Box(
             modifier = Modifier
@@ -59,7 +62,11 @@ internal fun QuizQuestionScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(24.dp))
-                    AnswerOptions(quizState.quizQuestion?.options) { /*answer -> selectedAnswer = answer*/ }
+                    AnswerOptions(
+                        options = quizState.quizQuestion?.options,
+                        onSelectAnswer = {
+                            onSelectAnswer(it)
+                        })
                     Spacer(modifier = Modifier.weight(1f))
                     QuizButton(
                         text = "Next",

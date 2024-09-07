@@ -45,9 +45,29 @@ class QuizViewModel @Inject constructor(private val quizRepo: QuizRepo) : ViewMo
         if (currentState == QuizListState.QuizLandingView) {
             updateUIState(
                 QuizListState.QuizQuestionView(
-                    quizQuestion =  _quizList.value?.quiz?.get(0),
+                    quizQuestion = _quizList.value?.quiz?.get(0),
                     questionNumber = 1,
                     totalQuestions = _quizList.value?.quiz?.size ?: 0,
+                )
+            )
+        }
+    }
+
+    internal fun onOptionSelection(id: String) {
+        val currentState = quizUIState.value
+        if (currentState is QuizListState.QuizQuestionView) {
+            val updatedOptions = currentState.quizQuestion?.options?.map { option ->
+                if (option.id == id) {
+                    option.copy(selected = !option.selected)
+                } else {
+                    option.copy(selected = option.selected)
+                }
+            }
+            updateUIState(
+                currentState.copy(
+                    currentState.quizQuestion?.copy(
+                        options = updatedOptions ?: emptyList()
+                    )
                 )
             )
         }
