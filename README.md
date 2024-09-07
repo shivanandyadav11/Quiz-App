@@ -10,6 +10,30 @@ A dynamic and interactive quiz application built with Kotlin for Android, follow
 - Result summary after quiz completion
 - Option to restart the quiz
 
+## Screenshots
+
+Here are some screenshots showcasing the main features of the Quiz App:
+
+### Landing Screen
+
+||
+|:---:|
+|<img width="300" alt="home" src="https://github.com/user-attachments/assets/3a855343-f0df-410e-9236-39a128012dea">|
+*The landing page where users can start a new quiz.*
+
+### Question Screen
+
+|||
+|:---:|:---:|
+|<img width="300" alt="ques12" src="https://github.com/user-attachments/assets/2b1c303a-6aa9-43d4-b66b-8904151685d5">|<img width="300" alt="ques1" src="https://github.com/user-attachments/assets/df573528-a417-4c64-a7ce-ebf015c6b850">|
+*An example of a quiz question with multiple choice options.*
+
+### Results Screen
+||
+|:---:|
+|<img width="300" alt="result" src="https://github.com/user-attachments/assets/31d3502d-fb93-486d-831d-ac6edc154797">|
+*The final screen showing the user's score and performance summary.*
+
 ## Architecture
 
 This app is built using the MVVM (Model-View-ViewModel) architecture, which provides a clean separation of concerns:
