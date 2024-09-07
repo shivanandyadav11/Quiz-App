@@ -95,6 +95,8 @@ dependencies {
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
+    implementation(libs.kotlinx.collections.immutable)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
 }

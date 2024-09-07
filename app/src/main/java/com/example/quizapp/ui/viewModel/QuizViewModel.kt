@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.TimeZone
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,6 +46,8 @@ class QuizViewModel @Inject constructor(private val quizRepo: QuizRepo) : ViewMo
             updateUIState(
                 QuizListState.QuizQuestionView(
                     quizQuestion =  _quizList.value?.quiz?.get(0),
+                    questionNumber = 1,
+                    totalQuestions = _quizList.value?.quiz?.size ?: 0,
                 )
             )
         }
@@ -60,6 +63,7 @@ class QuizViewModel @Inject constructor(private val quizRepo: QuizRepo) : ViewMo
         data class QuizQuestionView(
             val quizQuestion: Quiz?,
             val questionNumber: Int = 0,
+            val totalQuestions: Int = 0,
             val startTime: String = "",
             val submissionError: Boolean = false,
         ) : QuizListState("Questions")
