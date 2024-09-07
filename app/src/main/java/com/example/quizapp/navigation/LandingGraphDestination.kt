@@ -21,6 +21,10 @@ fun NavGraphBuilder.landingGraphDestination(
                 viewModel.getQuizList()
             }
         }
-        QuizLandingScreen()
+        QuizLandingScreen(
+            onStartClick = {
+
+            }
+        )
     }
 }

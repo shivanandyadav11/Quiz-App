@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
 import com.example.quizapp.navigation.ApplicationNavHost
+import com.example.quizapp.ui.compose.widget.LandingTopBarHeader
 import com.example.quizapp.ui.theme.QuizAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -32,9 +32,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
                         TopAppBar(
-                            title = { Text(text = "Home") },
+                            title = {
+                                LandingTopBarHeader()
+                            },
                             colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = Color.Red
+                                containerColor = Color.White
                             )
                         )
                     }
