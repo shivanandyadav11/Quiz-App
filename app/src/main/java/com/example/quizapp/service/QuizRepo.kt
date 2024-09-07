@@ -1,6 +1,7 @@
 package com.example.quizapp.service
 
 import com.example.quizapp.model.QuizAnswer
+import com.example.quizapp.model.QuizResponseList
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -17,10 +18,10 @@ interface QuizRepo {
      *
      * This method fetches the quiz data, potentially from a remote source or local cache.
      *
-     * @return A Flow emitting [QuizService.QuizResponse], which can be either a Success
+     * @return A Flow emitting [QuizService.QuizResponse] of [QuizResponseList], which can be either a Success
      *         containing the quiz list or a Failure indicating an error occurred.
      */
-    suspend fun getQuizList(): Flow<QuizService.QuizResponse>
+    suspend fun getQuizList(): Flow<QuizService.QuizResponse<QuizResponseList>>
 
     /**
      * Sends an attempted answer for a quiz question.
@@ -28,8 +29,8 @@ interface QuizRepo {
      * This method submits the user's answer to a quiz question, potentially to a remote server.
      *
      * @param quizAnswered The [QuizAnswer] object representing the user's answer.
-     * @return A Flow emitting [QuizService.QuizAttemptResponse], which indicates
+     * @return A Flow emitting [QuizService.QuizResponse] of [Boolean], which indicates
      *         whether the answer was successfully sent and processed.
      */
-    suspend fun sendAttemptedAnswer(quizAnswered: QuizAnswer): Flow<QuizService.QuizAttemptResponse>
+    suspend fun sendAttemptedAnswer(quizAnswered: QuizAnswer): Flow<QuizService.QuizResponse<Boolean>>
 }

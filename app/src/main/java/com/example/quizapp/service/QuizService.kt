@@ -14,7 +14,7 @@ import javax.inject.Inject
  * Service class for handling quiz-related API calls and response processing.
  *
  * This class encapsulates the logic for making API calls using [ApiService],
- * processing the responses, and wrapping them in appropriate result types.
+ * processing the responses, and wrapping them in a generic [QuizResponse] type.
  *
  * @property apiService The [ApiService] instance used for making API calls.
  */
@@ -23,9 +23,9 @@ class QuizService @Inject constructor(private val apiService: ApiService) {
     /**
      * Fetches the quiz list from the API.
      *
-     * @return A [Flow] emitting [QuizResponse] which can be either Success or Failure.
+     * @return A [Flow] emitting [QuizResponse] of [QuizResponseList] which can be either Success or Failure.
      */
-    suspend fun getQuizList(): Flow<QuizResponse> {
+    suspend fun getQuizList(): Flow<QuizResponse<QuizResponseList>> {
         return flow {
             val response = apiService.getQuizList()
             emit(handleResponse(response))
@@ -38,14 +38,14 @@ class QuizService @Inject constructor(private val apiService: ApiService) {
      * Sends an attempted answer to the API.
      *
      * @param quizAnswered The [QuizAnswer] to be sent to the API.
-     * @return A [Flow] emitting [QuizAttemptResponse] which can be either Success or Failure.
+     * @return A [Flow] emitting [QuizResponse] of [Boolean] which can be either Success or Failure.
      */
-    suspend fun sendAttemptedAnswer(quizAnswered: QuizAnswer): Flow<QuizAttemptResponse> {
+    suspend fun sendAttemptedAnswer(quizAnswered: QuizAnswer): Flow<QuizResponse<Boolean>> {
         return flow {
             val response = apiService.sendAttemptedAnswer(quizAnswered)
             emit(handleAttemptedResponse(response))
-        }.catch {
-            emit(QuizAttemptResponse.Failure)
+        }.catch { error ->
+            emit(QuizResponse.Failure(error.message ?: "Failed to send answer"))
         }
     }
 
@@ -53,13 +53,13 @@ class QuizService @Inject constructor(private val apiService: ApiService) {
      * Handles the response from the attempted answer API call.
      *
      * @param response The [Response] from the API call.
-     * @return [QuizAttemptResponse] indicating Success or Failure.
+     * @return [QuizResponse] of [Boolean] indicating Success or Failure.
      */
-    private fun handleAttemptedResponse(response: Response<QuizAttemptedResponse>): QuizAttemptResponse {
+    private fun handleAttemptedResponse(response: Response<QuizAttemptedResponse>): QuizResponse<Boolean> {
         return if (response.isSuccessful) {
-            QuizAttemptResponse.Success
+            QuizResponse.Success(true)
         } else {
-            QuizAttemptResponse.Failure
+            QuizResponse.Failure("Failed to send answer: ${response.message()}")
         }
     }
 
@@ -67,9 +67,9 @@ class QuizService @Inject constructor(private val apiService: ApiService) {
      * Handles the response from the quiz list API call.
      *
      * @param response The [Response] from the API call.
-     * @return [QuizResponse] wrapping the quiz list or an error message.
+     * @return [QuizResponse] of [QuizResponseList] wrapping the quiz list or an error message.
      */
-    private fun handleResponse(response: Response<QuizResponseList>): QuizResponse {
+    private fun handleResponse(response: Response<QuizResponseList>): QuizResponse<QuizResponseList> {
         return if (response.isSuccessful) {
             val responseBody = response.body()
             if (responseBody != null) {
@@ -83,36 +83,23 @@ class QuizService @Inject constructor(private val apiService: ApiService) {
     }
 
     /**
-     * Sealed class representing the possible responses from the quiz list API call.
+     * Sealed class representing the possible responses from API calls.
+     *
+     * @param T The type of data in case of a successful response.
      */
-    sealed class QuizResponse {
+    sealed class QuizResponse<out T> {
         /**
-         * Represents a successful response containing the quiz list.
+         * Represents a successful response containing data of type [T].
          *
-         * @property quizList The [QuizResponseList] retrieved from the API.
+         * @property data The data retrieved from the API.
          */
-        data class Success(val quizList: QuizResponseList) : QuizResponse()
+        data class Success<T>(val data: T) : QuizResponse<T>()
 
         /**
          * Represents a failed response with an error message.
          *
          * @property error The error message describing the failure reason.
          */
-        data class Failure(val error: String) : QuizResponse()
-    }
-
-    /**
-     * Sealed interface representing the possible responses from the attempted answer API call.
-     */
-    sealed interface QuizAttemptResponse {
-        /**
-         * Represents a successful attempt submission.
-         */
-        data object Success : QuizAttemptResponse
-
-        /**
-         * Represents a failed attempt submission.
-         */
-        data object Failure : QuizAttemptResponse
+        data class Failure(val error: String) : QuizResponse<Nothing>()
     }
 }

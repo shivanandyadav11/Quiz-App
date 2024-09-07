@@ -50,7 +50,7 @@ class QuizViewModel @Inject constructor(private val quizRepo: QuizRepo) : ViewMo
     internal suspend fun getQuizList() = viewModelScope.launch(Dispatchers.IO) {
         when (val response = quizRepo.getQuizList().first()) {
             is QuizService.QuizResponse.Success -> {
-                _quizList.emit(response.quizList)
+                _quizList.emit(response.data)
             }
             is QuizService.QuizResponse.Failure -> {
                 _quizList.emit(null)
@@ -94,7 +94,7 @@ class QuizViewModel @Inject constructor(private val quizRepo: QuizRepo) : ViewMo
                 quizAnswers.add(quizAnswered)
                 val response = quizRepo.sendAttemptedAnswer(quizAnswered).first()
                 when (response) {
-                    is QuizService.QuizAttemptResponse.Success -> {
+                    is QuizService.QuizResponse.Success -> {
                         if (_quizList.value?.quiz?.size == currentState.questionNumber + 1) {
                             val correctAnswer = quizAnswers.count { it.correctAnswer }
                             updateUIState(
@@ -115,7 +115,7 @@ class QuizViewModel @Inject constructor(private val quizRepo: QuizRepo) : ViewMo
                             )
                         }
                     }
-                    QuizService.QuizAttemptResponse.Failure -> Unit
+                    is QuizService.QuizResponse.Failure -> Unit
                 }
             }
         }
