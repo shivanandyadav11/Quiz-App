@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.example.quizapp.handler.QuizHandler
 import com.example.quizapp.ui.compose.widget.QuizButton
 import com.example.quizapp.ui.compose.widget.QuizOption
+import com.example.quizapp.ui.compose.widget.ScoreGaugeWidget
 import com.example.quizapp.ui.viewModel.QuizViewModel
 
 @Composable
@@ -60,6 +61,12 @@ internal fun QuizSuccessScreen(
                         text = "Your Result",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    ScoreGaugeWidget(
+                        score = quizState.score,
+                        modifier = Modifier
+                            .fillMaxWidth(.8f),
                     )
                     Spacer(modifier = Modifier.height(32.dp))
                     QuizOption(
