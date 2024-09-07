@@ -54,7 +54,7 @@ internal fun QuizScreen(viewModel: QuizViewModel = hiltViewModel()) {
                     viewModel.getNextQuiz()
                 },
                 onStartAgain = {
-                    // TODO
+                    viewModel.startQuizAgain()
                 }
             ),
             onSelectAnswer = {

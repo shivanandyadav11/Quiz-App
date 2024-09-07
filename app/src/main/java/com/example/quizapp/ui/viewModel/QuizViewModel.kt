@@ -28,7 +28,7 @@ class QuizViewModel @Inject constructor(private val quizRepo: QuizRepo) : ViewMo
     private val quizUiMutableState = MutableStateFlow<QuizListState>(QuizListState.QuizLandingView)
     internal val quizUIState: StateFlow<QuizListState> = quizUiMutableState.asStateFlow()
 
-    suspend fun getQuizList() = viewModelScope.launch(Dispatchers.IO) {
+    internal suspend fun getQuizList() = viewModelScope.launch(Dispatchers.IO) {
         when (val response = quizRepo.getQuizList().first()) {
             is QuizService.QuizResponse.Success -> {
                 _quizList.emit(response.quizList)
@@ -40,7 +40,7 @@ class QuizViewModel @Inject constructor(private val quizRepo: QuizRepo) : ViewMo
         }
     }
 
-    fun startQuiz() {
+    internal fun startQuiz() {
         val currentState = quizUIState.value
         if (currentState == QuizListState.QuizLandingView) {
             updateUIState(
@@ -56,28 +56,28 @@ class QuizViewModel @Inject constructor(private val quizRepo: QuizRepo) : ViewMo
     internal fun getNextQuiz() = viewModelScope.launch {
         val currentState = quizUIState.value
         if (currentState is QuizListState.QuizQuestionView) {
-            if (_quizList.value?.quiz?.size == currentState.questionNumber + 1) {
-                val correctAnswer = quizAnswers.count { it.correctAnswer }
-                updateUIState(
-                    QuizListState.QuizSuccessView(
-                        score = ((correctAnswer.toDouble() / quizAnswers.size.toDouble()) * 100).roundToInt(),
-                        correctAnswer = correctAnswer,
-                        wrongAnswer = quizAnswers.size - correctAnswer,
-                    )
+            val optionSelected =
+                currentState.quizQuestion?.options?.find { it.selected }?.selected
+            if (optionSelected == true) {
+                val result = isCorrectAnswer(currentState)
+                val quizAnswered = QuizAnswer(
+                    id = currentState.quizQuestion.id,
+                    correctAnswer = result
                 )
-            } else {
-                val optionSelected =
-                    currentState.quizQuestion?.options?.find { it.selected }?.selected
-                if (optionSelected == true) {
-                    val result = isCorrectAnswer(currentState)
-                    val quizAnswered = QuizAnswer(
-                        id = currentState.quizQuestion.id,
-                        correctAnswer = result
-                    )
-                    quizAnswers.add(quizAnswered)
-                    val response = quizRepo.sendAttemptedAnswer(quizAnswered).first()
-                    when (response) {
-                        is QuizService.QuizAttemptResponse.Success -> {
+                quizAnswers.add(quizAnswered)
+                val response = quizRepo.sendAttemptedAnswer(quizAnswered).first()
+                when (response) {
+                    is QuizService.QuizAttemptResponse.Success -> {
+                        if (_quizList.value?.quiz?.size == currentState.questionNumber + 1) {
+                            val correctAnswer = quizAnswers.count { it.correctAnswer }
+                            updateUIState(
+                                QuizListState.QuizSuccessView(
+                                    score = ((correctAnswer.toDouble() / quizAnswers.size.toDouble()) * 100).roundToInt(),
+                                    correctAnswer = correctAnswer,
+                                    wrongAnswer = quizAnswers.size - correctAnswer,
+                                )
+                            )
+                        } else {
                             val questionNumber = currentState.questionNumber + 1
                             updateUIState(
                                 QuizListState.QuizQuestionView(
@@ -87,26 +87,22 @@ class QuizViewModel @Inject constructor(private val quizRepo: QuizRepo) : ViewMo
                                 )
                             )
                         }
-
-                        QuizService.QuizAttemptResponse.Failure -> Unit
                     }
+
+                    QuizService.QuizAttemptResponse.Failure -> Unit
                 }
             }
         }
     }
 
-    private fun isCorrectAnswer(currentState: QuizListState.QuizQuestionView): Boolean {
-        val quiz = currentState.quizQuestion
-        // Get all selected option IDs
-        val selectedOptionIds = quiz?.options?.filter { it.selected }?.map { it.id }
-
-        // Get all correct answer IDs
-        val correctAnswerIds = quiz?.correctAnswers?.map { it.answerId }
-
-        // Check if the sets are equal
-        val isCorrect = selectedOptionIds?.toSet() == correctAnswerIds?.toSet()
-
-        return isCorrect
+    internal fun startQuizAgain() {
+        val currentState = quizUIState.value
+        if (currentState is QuizListState.QuizSuccessView) {
+            quizAnswers.clear()
+            updateUIState(
+                QuizListState.QuizLandingView
+            )
+        }
     }
 
     internal fun onOptionSelection(id: String) {
@@ -131,6 +127,20 @@ class QuizViewModel @Inject constructor(private val quizRepo: QuizRepo) : ViewMo
 
     private fun updateUIState(state: QuizListState) {
         quizUiMutableState.update { state }
+    }
+
+    private fun isCorrectAnswer(currentState: QuizListState.QuizQuestionView): Boolean {
+        val quiz = currentState.quizQuestion
+        // Get all selected option IDs
+        val selectedOptionIds = quiz?.options?.filter { it.selected }?.map { it.id }
+
+        // Get all correct answer IDs
+        val correctAnswerIds = quiz?.correctAnswers?.map { it.answerId }
+
+        // Check if the sets are equal
+        val isCorrect = selectedOptionIds?.toSet() == correctAnswerIds?.toSet()
+
+        return isCorrect
     }
 
     @Stable
